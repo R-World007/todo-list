@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import TextInputWithLabel from '../../shared/TextInputWithLabel';
-import { isValidTodoTitle } from '../../utils/todoValidation';
+import TextInputWithLabel from '../../../shared/TextInputWithLabel';
+import { isValidTodoTitle } from '../../../utils/todoValidation';
 
 function TodoListItem({ todo, onCompleteTodo, onUpdateTodo }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -11,14 +11,10 @@ function TodoListItem({ todo, onCompleteTodo, onUpdateTodo }) {
     setIsEditing(false);
   };
 
-  const handleEdit = (event) => {
-    setWorkingTitle(event.target.value);
-  };
-
   const handleUpdate = (event) => {
-    if (!isEditing) return;
-
     event.preventDefault();
+    if (!isEditing || !isValidTodoTitle(workingTitle)) return;
+
     onUpdateTodo({ ...todo, title: workingTitle });
     setIsEditing(false);
   };
@@ -32,34 +28,30 @@ function TodoListItem({ todo, onCompleteTodo, onUpdateTodo }) {
               elementId={`editTodo${todo.id}`}
               labelText="Todo"
               value={workingTitle}
-              onChange={handleEdit}
+              onChange={(event) => setWorkingTitle(event.target.value)}
             />
-            <button type="button" onClick={handleCancel}>
-              Cancel
-            </button>
-            <button
-              type="button"
-              onClick={handleUpdate}
-              disabled={!isValidTodoTitle(workingTitle)}
-            >
+            <button type="button" onClick={handleCancel}>Cancel</button>
+            <button type="submit" disabled={!isValidTodoTitle(workingTitle)}>
               Update
             </button>
           </>
         ) : (
           <>
-            <label>
-              <input
-                type="checkbox"
-                id={`checkbox${todo.id}`}
-                checked={todo.isCompleted}
-                onChange={() => onCompleteTodo(todo.id)}
-              />
-            </label>
-            <span onClick={() => setIsEditing(true)}>{todo.title}</span>
+            <input
+              aria-label={`Mark ${todo.title} complete`}
+              type="checkbox"
+              id={`checkbox${todo.id}`}
+              checked={todo.isCompleted}
+              onChange={() => onCompleteTodo(todo.id)}
+            />
+            <button type="button" className="todo-title" onClick={() => setIsEditing(true)}>
+              {todo.title}
+            </button>
           </>
         )}
       </form>
     </li>
   );
 }
+
 export default TodoListItem;
